@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew --version:*)",
+      "Bash(~/.zshrc)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "github"
+  ]
+}
