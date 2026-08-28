@@ -1,6 +1,5 @@
+# [1] 뉴스 수집 파이프라인 (GitHub Actions가 매일 설치)
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 youtube-transcript-api>=0.6.0
 python-dotenv>=1.0.0
-anthropic>=0.105.2
-playwright>=1.49.0

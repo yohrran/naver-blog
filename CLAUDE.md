@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Install dependencies (this machine has `pip3`, not `pip`)
-pip3 install -r requirements.txt
+pip3 install -r requirements-write.txt   # local: everything
+pip3 install -r requirements.txt         # CI: collection only
 
 # [1] Collect news → drafts/YYYY-MM-DD.{md,html}, email it
 python -m src.main
@@ -76,7 +77,8 @@ This is why stage 2 could be added without touching stage 1: `save_draft()` and
 - `src/publisher/naver_editor.py` — the `SELECTORS` dict is the only thing that breaks when Naver changes the editor DOM. Fix it there; leave the rest alone.
 - `drafts/` — collected raw material, `YYYY-MM-DD.{md,html}`. Auto-committed by GitHub Actions.
 - `posts/` — finished posts, gitignored (a public repo shouldn't leak unpublished drafts).
-- `.github/workflows/daily-blog.yml` — cron schedule (UTC) and the 5 required GitHub Secrets. It runs stage 1 only.
+- `.github/workflows/daily-blog.yml` — cron schedule (UTC) and the 5 required GitHub Secrets. It runs stage 1 only, so it installs the lean `requirements.txt`.
+- `requirements.txt` / `requirements-write.txt` — split deliberately: stage 1 imports neither `anthropic` nor `playwright`, and CI shouldn't pay to install them daily. Keep new stage-2/3 deps out of `requirements.txt`.
 
 ## Environment variables
 

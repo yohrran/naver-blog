@@ -53,7 +53,8 @@ naver-blog/
 ├── blog-post.md                # 문체 학습용 예시 글
 ├── .github/workflows/
 │   └── daily-blog.yml          # GitHub Actions 워크플로우
-├── requirements.txt
+├── requirements.txt            # 수집용 (CI가 설치)
+├── requirements-write.txt      # 글쓰기·발행용 (로컬)
 ├── .env.example
 └── .gitignore
 ```
@@ -90,8 +91,11 @@ NAVER_BLOG_ID=블로그_아이디        # blog.naver.com/<여기>
 ### 3. 설치
 
 ```bash
-pip3 install -r requirements.txt
+pip3 install -r requirements-write.txt
 ```
+
+`requirements.txt`는 수집만 돌리는 GitHub Actions용으로 가볍게 유지합니다.
+로컬에서 글쓰기까지 쓰려면 위처럼 `requirements-write.txt`를 설치하세요.
 
 시스템에 Chrome이 없다면 브라우저도 한 번 받아둡니다:
 

@@ -1,0 +1,5 @@
+# [2] 글쓰기 + [3] 에디터 입력 (로컬에서만 필요)
+# 수집만 돌리는 GitHub Actions는 설치하지 않는다.
+-r requirements.txt
+anthropic>=1.0.0
+playwright>=1.49.0
