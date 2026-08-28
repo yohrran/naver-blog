@@ -106,7 +106,7 @@ def fill_editor(page, post, debug=False):
         page.pause()
 
 
-def open_and_fill(playwright, post, blog_id, browser_factory, context_factory, debug=False):
+def open_and_fill(playwright, post, blog_id, context_factory, debug=False):
     """브라우저를 띄우고 글쓰기 화면에 내용을 채운 뒤, 사람이 발행하도록 기다린다."""
     if not blog_id:
         raise ValueError(
@@ -114,15 +114,18 @@ def open_and_fill(playwright, post, blog_id, browser_factory, context_factory, d
             "blog.naver.com/<아이디>의 <아이디>를 .env에 넣어주세요."
         )
 
-    browser = browser_factory(playwright, headless=False)
-    context = context_factory(browser)
-    page = context.new_page()
+    # persistent context는 브라우저와 한 몸이라 close()도 하나뿐이다.
+    # 로그인 확인은 context_factory가 이미 끝냈다.
+    context = context_factory(playwright)
+    page = context.pages[0] if context.pages else context.new_page()
     page.set_default_timeout(DEFAULT_TIMEOUT_MS)
 
     try:
         page.goto(WRITE_URL.format(blog_id=blog_id), wait_until="domcontentloaded")
 
-        if "nidlogin" in page.url:
+        # 쿠키는 있었지만 서버가 세션을 무효화한 경우가 남는다.
+        # URL이 로그인 도메인으로 튕기면 그 자리에서 멈춘다.
+        if "nid.naver.com" in page.url or "nidlogin" in page.url:
             raise RuntimeError(
                 "로그인 세션이 만료되었습니다. "
                 "`python -m src.publish --login`으로 다시 로그인해주세요."
@@ -150,7 +153,7 @@ def open_and_fill(playwright, post, blog_id, browser_factory, context_factory, d
         _wait_for_enter("확인 후 Enter > ")
         raise
     finally:
-        browser.close()
+        context.close()
 
 
 def _wait_for_enter(message):

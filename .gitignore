@@ -10,4 +10,5 @@ dist/
 build/
 .omc/
 .naver_session.json
+.naver_profile/
 posts/

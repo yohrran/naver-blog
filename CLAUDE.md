@@ -63,8 +63,16 @@ This is why stage 2 could be added without touching stage 1: `save_draft()` and
   of physical human writing and registration". `src/publisher/` therefore fills the editor
   and stops. Do not add a click on the 발행 button.
 - **Login is never automated.** `python -m src.publish --login` opens a browser, a human
-  logs in, and only the resulting cookies are saved to `.naver_session.json` (gitignored,
-  chmod 600). No credentials live in code or `.env`.
+  logs in, and the resulting cookies stay in a dedicated Chrome profile at `.naver_profile/`
+  (gitignored, chmod 700). No credentials live in code or `.env`. Automating the login form
+  is not a policy question but an engineering one: `nid.naver.com` detects scripted input and
+  answers with a captcha, a new-device check, or an account lock.
+- **Session lifetime hinges on one checkbox.** Without "로그인 상태 유지", Naver issues
+  `NID_AUT`/`NID_SES` as session cookies, which by definition vanish when the browser closes
+  — so the persistent profile buys nothing. `_enable_login_stay()` ticks it before handing
+  the browser over, and verifies via `checked && value === 'on'`: Naver's own handler flips
+  `value` from `off` to `on`, and `value` is what the form submits. Checking `checked` alone
+  would pass while the server silently declines to keep the session.
 - **The Naver Search API is migrating to NAVER API HUB.** `openapi.naver.com` +
   `X-Naver-Client-Id/Secret` still works, but legacy support ends 2027-06-30; the
   replacement is `naverapihub.apigw.ntruss.com` + `X-NCP-APIGW-API-KEY-ID/KEY`.
@@ -75,6 +83,7 @@ This is why stage 2 could be added without touching stage 1: `save_draft()` and
 - `blog-post.md` — the writing-style exemplar. It is fed to Claude as a few-shot sample, so the post's tone *is* the blog's tone. Swapping this file changes the voice more than editing rules does.
 - `src/generator/style.py` — explicit style rules (`STYLE_RULES`) plus prompt assembly. `build_system_prompt()` must stay deterministic — any varying value (timestamp, random ID) silently kills the prompt cache.
 - `src/publisher/naver_editor.py` — the `SELECTORS` dict is the only thing that breaks when Naver changes the editor DOM. Fix it there; leave the rest alone.
+- `src/publisher/naver_session.py` — owns the profile, the keep-login checkbox, and the logged-in check. `new_logged_in_context()` verifies cookies *before* navigating, so an expired session reports itself instead of failing later as a missing selector.
 - `drafts/` — collected raw material, `YYYY-MM-DD.{md,html}`. Auto-committed by GitHub Actions.
 - `posts/` — finished posts, gitignored (a public repo shouldn't leak unpublished drafts).
 - `.github/workflows/daily-blog.yml` — cron schedule (UTC) and the 5 required GitHub Secrets. It runs stage 1 only, so it installs the lean `requirements.txt`.

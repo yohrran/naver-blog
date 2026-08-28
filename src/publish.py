@@ -15,10 +15,9 @@ from src.config import NAVER_BLOG_ID
 from src.generator.post_file import find_latest_post, load_post
 from src.publisher.naver_editor import open_and_fill
 from src.publisher.naver_session import (
-    launch_browser,
     new_logged_in_context,
-    save_session,
-    session_exists,
+    profile_exists,
+    run_login,
 )
 
 
@@ -50,7 +49,7 @@ def _resolve_post_path(path):
 
 def _require_session():
     """세션이 없으면 브라우저를 띄우기 전에 미리 알려준다."""
-    if not session_exists():
+    if not profile_exists():
         raise FileNotFoundError(
             "네이버 로그인 세션이 없습니다.\n"
             "먼저 `python -m src.publish --login`을 실행해 로그인해주세요."
@@ -70,14 +69,13 @@ def main(argv=None):
 
         with sync_playwright() as playwright:
             if args.login:
-                save_session(playwright)
+                run_login(playwright)
                 return 0
 
             open_and_fill(
                 playwright,
                 post,
                 NAVER_BLOG_ID,
-                browser_factory=launch_browser,
                 context_factory=new_logged_in_context,
                 debug=args.debug,
             )
