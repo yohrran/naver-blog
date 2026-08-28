@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+_ROOT = os.path.dirname(os.path.dirname(__file__))
+
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
@@ -34,4 +36,23 @@ TOPIC_KEYWORDS = {
     "경제 일반": ["경제", "GDP", "물가", "인플레이션", "수출", "수입"],
 }
 
-DRAFTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "drafts")
+DRAFTS_DIR = os.path.join(_ROOT, "drafts")
+
+# --- 글 작성(generator) 설정 ---
+
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-5")
+
+# 완성글이 저장되는 곳 (drafts/는 수집 초안, posts/는 발행용 완성글)
+POSTS_DIR = os.path.join(_ROOT, "posts")
+
+# 문체 학습용 예시 글. 이 파일의 톤을 따라 씁니다.
+STYLE_SAMPLE_PATH = os.path.join(_ROOT, "blog-post.md")
+
+# --- 발행(publisher) 설정 ---
+
+# blog.naver.com/<여기> 에 해당하는 아이디
+NAVER_BLOG_ID = os.getenv("NAVER_BLOG_ID", "")
+
+# 수동 로그인 1회로 만들어지는 브라우저 세션 파일 (절대 커밋 금지)
+NAVER_SESSION_PATH = os.path.join(_ROOT, ".naver_session.json")

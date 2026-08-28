@@ -9,3 +9,5 @@ venv/
 dist/
 build/
 .omc/
+.naver_session.json
+posts/
