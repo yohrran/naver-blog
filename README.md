@@ -44,13 +44,10 @@ naver-blog/
 │   │   ├── post_writer.py      # Claude API 호출
 │   │   └── post_file.py        # 완성글 파일 형식
 │   ├── handoff.py              # [붙여넣기] CLI
-│   ├── publish.py              # [에디터 채우기] CLI (구경로)
 │   └── publisher/
 │       ├── handoff_page.py     # 복사 버튼 달린 페이지 생성
-│       ├── markdown_html.py    # 마크다운 → 붙여넣기용 HTML
-│       ├── naver_session.py    # 로그인 세션 저장/재사용
-│       ├── naver_editor.py     # 스마트에디터 입력 (발행은 안 함)
-│       └── editor_text.py      # 마크다운 → 에디터 평문
+│       ├── markdown_html.py    # 마크다운 → 붙여넣기용 HTML (기본)
+│       └── editor_text.py      # 마크다운 → 평문 ([평문으로] 대비책)
 ├── drafts/                     # 수집 초안 (날짜별, 자동 커밋)
 ├── posts/                      # 완성글 (gitignore됨)
 ├── blog-post.md                # 문체 학습용 예시 글
@@ -88,7 +85,6 @@ YOUTUBE_API_KEY=유튜브_API_키
 GMAIL_ADDRESS=your@gmail.com
 GMAIL_APP_PASSWORD=16자리_앱_비밀번호
 ANTHROPIC_API_KEY=sk-ant-xxxxx
-NAVER_BLOG_ID=블로그_아이디        # blog.naver.com/<여기>
 ```
 
 ### 3. 설치
@@ -100,11 +96,7 @@ pip3 install -r requirements-write.txt
 `requirements.txt`는 수집만 돌리는 GitHub Actions용으로 가볍게 유지합니다.
 로컬에서 글쓰기까지 쓰려면 위처럼 `requirements-write.txt`를 설치하세요.
 
-시스템에 Chrome이 없다면 브라우저도 한 번 받아둡니다:
-
-```bash
-python3 -m playwright install chromium
-```
+[3] 붙여넣기 단계는 추가 설치가 필요 없습니다. 표준 라이브러리만 씁니다.
 
 ## 사용법
 
@@ -158,25 +150,6 @@ python -m src.handoff --no-open                    # 파일만 만들고 안 엶
 로그인도, 세션도, 브라우저 자동화도 필요 없습니다. 글 파일 하나만 읽습니다.
 **발행 버튼은 직접 누르세요.** 사진은 에디터에서 넣는 게 빠릅니다.
 
-### [3-alt] 에디터에 직접 채우기 (구경로)
-
-Playwright로 에디터에 타이핑하는 예전 방식입니다. 네이버가 에디터 DOM을 바꾸면 깨지고,
-서식이 평문으로 떨어집니다. 붙여넣기가 안 되는 상황을 대비해 남겨뒀습니다.
-
-최초 1회, 네이버에 직접 로그인해서 세션을 저장합니다:
-
-```bash
-python -m src.publish --login
-```
-
-브라우저가 뜨면 **직접** 로그인하고 터미널로 돌아와 Enter를 누르면 됩니다.
-아이디·비밀번호는 코드가 다루지 않습니다.
-
-```bash
-python -m src.publish                              # posts/의 최신 글
-python -m src.publish --debug                      # 선택자가 깨졌을 때
-```
-
 ## 왜 자동 발행은 하지 않나요
 
 네이버 공식 글쓰기 API는 [2020년 5월에 종료](https://www.newspim.com/news/view/20200413000737)됐고
@@ -199,16 +172,16 @@ python -m src.publish --debug                      # 선택자가 깨졌을 때
 
 예시 글을 바꾸는 쪽이 규칙을 고치는 것보다 효과가 큽니다.
 
-## 에디터 선택자가 깨졌을 때
+## 붙여넣기가 이상할 때
 
-네이버가 스마트에디터 DOM을 바꾸면 `[ERROR] 제목 입력란을 찾지 못했습니다`가 납니다.
+**서식이 깨져서 붙는다면** 같은 자리의 [평문으로] 버튼을 쓰세요. 기호를 걷어낸 평문이
+들어가고, 서식은 에디터에서 입히면 됩니다.
 
-```bash
-python -m src.publish --debug
-```
+**글에 배경색이 따라 붙는다면** 복사 원본에 페이지 스타일이 샌 것입니다. 크롬은 선택 영역을
+복사할 때 계산된 스타일을 인라인으로 박아 보냅니다. `handoff_page.py`의 CSS에서 리셋 범위가
+`.wrap, .wrap *`인지 확인하세요. 전역 `*`로 되돌리면 이 증상이 재발합니다.
 
-Playwright Inspector가 열리면 개발자도구로 실제 선택자를 확인한 뒤
-`src/publisher/naver_editor.py`의 `SELECTORS` 딕셔너리만 고치면 됩니다. 나머지 코드는 그대로 둡니다.
+**태그가 한 덩어리로 들어간다면** 칩을 하나씩 눌러 개별 복사하면 됩니다.
 
 ## 커스터마이징
 

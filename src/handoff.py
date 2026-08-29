@@ -4,8 +4,7 @@
     python -m src.handoff posts/2026-08-29-어쩌고.md
     python -m src.handoff --no-open                # 파일만 만들고 열지 않음
 
-에디터 자동 입력(`python -m src.publish`)과 목적은 같고 방식이 다르다.
-이쪽은 네이버 DOM도, 로그인 세션도, 브라우저 자동화도 필요 없다.
+네이버 DOM도, 로그인 세션도, 브라우저 자동화도 필요 없다. 글 파일 하나만 읽는다.
 """
 
 import argparse

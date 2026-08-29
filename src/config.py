@@ -48,13 +48,3 @@ POSTS_DIR = os.path.join(_ROOT, "posts")
 
 # 문체 학습용 예시 글. 이 파일의 톤을 따라 씁니다.
 STYLE_SAMPLE_PATH = os.path.join(_ROOT, "blog-post.md")
-
-# --- 발행(publisher) 설정 ---
-
-# blog.naver.com/<여기> 에 해당하는 아이디
-NAVER_BLOG_ID = os.getenv("NAVER_BLOG_ID", "")
-
-# 로그인 쿠키가 사는 전용 브라우저 프로파일.
-# 매 실행마다 임시 프로파일을 새로 만들면 네이버가 '새 기기'로 보고 인증을
-# 요구한다. 프로파일을 고정하면 그 일이 없고, 쿠키도 실행할 때마다 갱신된다.
-NAVER_PROFILE_DIR = os.path.join(_ROOT, ".naver_profile")
