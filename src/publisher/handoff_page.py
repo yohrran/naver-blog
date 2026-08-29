@@ -43,7 +43,7 @@ _CSS = """
     --muted: #9aa1ab; --accent: #03c75a; --accent-ink: #7ee0a8;
   }
 }
-* { box-sizing: border-box; }
+.wrap, .wrap * { box-sizing: border-box; }
 body {
   margin: 0; padding: 32px 20px 80px; background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
@@ -110,6 +110,18 @@ button.primary:hover { color: #fff; opacity: .9; }
 .warn strong { color: var(--text); }
 /* 화면 밖 복사 원본. display:none이면 선택이 안 되므로 밀어내기만 한다. */
 .offscreen { position: fixed; top: 0; left: -100000px; width: 640px; }
+/* 크롬은 선택 영역을 복사할 때 **계산된** 스타일을 인라인으로 박아 보낸다.
+   그래서 body가 상속시킨 색·폰트·줄간격이 그대로 클립보드에 실려
+   네이버 본문으로 따라 들어간다. 다크 모드면 검은 배경이 통째로 붙는다.
+   복사 원본만 브라우저 기본값으로 되돌려 실릴 것을 없앤다. */
+#clip-body {
+  color-scheme: light;          /* 시스템이 다크여도 기본색을 밝은 쪽으로 고정 */
+  color: #000;
+  background-color: #fff;       /* transparent면 크롬이 조상 배경을 대신 박는다 */
+  font-family: initial;
+  line-height: initial;
+  -webkit-font-smoothing: auto;
+}
 #toast {
   position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
   background: #1a1d21; color: #fff; padding: 11px 20px; border-radius: 999px;
