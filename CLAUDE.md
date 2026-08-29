@@ -18,14 +18,21 @@ python -m src.compose                       # from today's draft
 python -m src.compose --date 2026-08-25
 python -m src.compose --topic "any topic" --notes "..."
 
-# [3] Fill the Naver editor (never publishes)
+# [3] Build a copy-paste handoff page — the default path
+python -m src.handoff                       # latest post in posts/
+python -m src.handoff [path]
+python -m src.handoff --no-open             # write the file, don't open a browser
+
+# [3-alt] Drive the editor directly (legacy; breaks when Naver changes the DOM)
 python -m src.publish --login               # once: log in by hand
 python -m src.publish [path]
 python -m src.publish --debug               # when selectors break
 ```
 
-There is no test suite. Stages 1 and 2 need real API keys in `.env`; stage 3 needs a
-saved Naver session and can only be verified by hand against the live editor.
+There is no test suite. Stages 1 and 2 need real API keys in `.env`. `src.handoff` needs
+neither keys nor a session — it only reads a post file — so it is the one stage you can
+run and eyeball anywhere. `src.publish` needs a saved Naver session and can only be
+verified by hand against the live editor.
 
 ## Architecture
 
@@ -40,8 +47,11 @@ are run by hand.
     (or a --topic string)  ├→ write_from_draft()/write_from_topic() → save_post()
     src/output/            ┘  src/generator/post_writer.py            src/generator/post_file.py
 
-[3] load_post() → open_and_fill() → (human clicks 발행)
-    src/generator/  src/publisher/naver_editor.py
+[3] load_post() → save_handoff() → (human copies 3 times, clicks 발행)
+    src/generator/  src/publisher/handoff_page.py
+
+[3-alt] load_post() → open_and_fill() → (human clicks 발행)
+        src/generator/  src/publisher/naver_editor.py
 ```
 
 Every stage communicates only through plain Python dicts:
@@ -62,6 +72,14 @@ This is why stage 2 could be added without touching stage 1: `save_draft()` and
 - **Automated publishing risks account sanctions.** Naver blocks access outside "the range
   of physical human writing and registration". `src/publisher/` therefore fills the editor
   and stops. Do not add a click on the 발행 button.
+- **Typing loses formatting; pasting keeps it.** SmartEditor ignores markdown, so the
+  keyboard path (`editor_text.py`) had to strip `##`, `**`, and `[]()` down to plain text —
+  the human then re-applied every heading and bold by hand. A clipboard carries `text/html`,
+  so `handoff_page.py` pastes headings, bold, links, and lists intact. That is why the
+  handoff page is the default and the Playwright path is the fallback, not the reverse.
+- **The handoff page runs from `file://`, so it copies with `document.execCommand('copy')`.**
+  Deprecated but functional, and unlike `navigator.clipboard.write()` it needs no secure
+  context. Verified end-to-end (copy → paste into a contenteditable → tags survive).
 - **Login is never automated.** `python -m src.publish --login` opens a browser, a human
   logs in, and the resulting cookies stay in a dedicated Chrome profile at `.naver_profile/`
   (gitignored, chmod 700). No credentials live in code or `.env`. Automating the login form
@@ -82,7 +100,9 @@ This is why stage 2 could be added without touching stage 1: `save_draft()` and
 - `src/config.py` — **single source of truth** for all behavior: search keywords (`NEWS_KEYWORDS`), topic classification rules (`TOPIC_KEYWORDS`), YouTube channel IDs (`YOUTUBE_CHANNEL_IDS`), articles-per-topic cap (`MAX_ARTICLES_PER_TOPIC`), the Claude model, and all output paths. All customization goes here.
 - `blog-post.md` — the writing-style exemplar. It is fed to Claude as a few-shot sample, so the post's tone *is* the blog's tone. Swapping this file changes the voice more than editing rules does.
 - `src/generator/style.py` — explicit style rules (`STYLE_RULES`) plus prompt assembly. `build_system_prompt()` must stay deterministic — any varying value (timestamp, random ID) silently kills the prompt cache.
-- `src/publisher/naver_editor.py` — the `SELECTORS` dict is the only thing that breaks when Naver changes the editor DOM. Fix it there; leave the rest alone.
+- `src/publisher/handoff_page.py` — builds the copy-paste page. Keeps the styled `#preview` and the offscreen `#clip-body` separate on purpose: Chrome inlines computed styles when it copies a selection, so copying from the pretty preview would drag its fonts and colors into the Naver post. `#clip-body` carries no styles.
+- `src/publisher/markdown_html.py` — markdown → paste-ready HTML. Hand-rolled rather than a dependency: the posts only use 7 constructs. Paragraph line breaks become `<br>` deliberately — this blog's rhythm is one sentence per line, and standard markdown would collapse them.
+- `src/publisher/naver_editor.py` — legacy path. The `SELECTORS` dict is the only thing that breaks when Naver changes the editor DOM. Fix it there; leave the rest alone.
 - `src/publisher/naver_session.py` — owns the profile, the keep-login checkbox, and the logged-in check. `new_logged_in_context()` verifies cookies *before* navigating, so an expired session reports itself instead of failing later as a missing selector.
 - `drafts/` — collected raw material, `YYYY-MM-DD.{md,html}`. Auto-committed by GitHub Actions.
 - `posts/` — finished posts, gitignored (a public repo shouldn't leak unpublished drafts).

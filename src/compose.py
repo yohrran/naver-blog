@@ -53,8 +53,8 @@ def main(argv=None):
     print(f"태그: {', '.join(post['tags'])}")
     print(f"길이: {len(post['body'])}자")
     print()
-    print("확인 후 아래 명령으로 네이버 에디터에 채워 넣으세요:")
-    print(f"  python -m src.publish {path}")
+    print("확인 후 아래 명령으로 붙여넣기 페이지를 여세요:")
+    print(f"  python -m src.handoff {path}")
     return 0
 
 
