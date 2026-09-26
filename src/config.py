@@ -48,11 +48,3 @@ POSTS_DIR = os.path.join(_ROOT, "posts")
 
 # 문체 학습용 예시 글. 이 파일의 톤을 따라 씁니다.
 STYLE_SAMPLE_PATH = os.path.join(_ROOT, "blog-post.md")
-
-# --- 발행(publisher) 설정 ---
-
-# blog.naver.com/<여기> 에 해당하는 아이디
-NAVER_BLOG_ID = os.getenv("NAVER_BLOG_ID", "")
-
-# 수동 로그인 1회로 만들어지는 브라우저 세션 파일 (절대 커밋 금지)
-NAVER_SESSION_PATH = os.path.join(_ROOT, ".naver_session.json")
