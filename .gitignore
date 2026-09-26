@@ -9,6 +9,11 @@ venv/
 dist/
 build/
 .omc/
-.naver_session.json
-.naver_profile/
 posts/
+
+# 이 맥에서의 Claude 권한 설정. 공개 저장소에 둘 내용이 아니다
+.claude/settings.local.json
+
+# 도구가 만드는 상태 파일
+.pdca-status.json
+.bkit-memory.json
